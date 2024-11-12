@@ -35,33 +35,34 @@ def resize_image(image, size, letterbox_image):
 
 def std_output(pred):
     """
-    将（1，84，8400）处理成（8400， 85）  85= box:4  conf:1 cls:80
+    将(1,84,8400)处理成(8400, 85)  85= box:4  conf:1 cls:80
     """
-    pred = np.squeeze(pred)  # 因为只是推理，所以没有Batch
+    pred = np.squeeze(pred) 
     pred = np.transpose(pred, (1, 0))
     pred_class = pred[..., 4:]
     pred_conf = np.max(pred_class, axis=-1)
     pred = np.insert(pred, 4, pred_conf, axis=-1)
-    return pred  #（8400，85）
+    return pred  #(8400,85)
 
-def predict(imageoringin):
-    # 加载ONNX模型
+def predict(imageoringin,size):
+    """
+    模型预测
+    Args:
+        imageoringin: 输入图像
+        size: 输入尺寸
+    Returns: 输出结果
+    """
     ort_session = ort.InferenceSession("yolov8n.onnx")
     
-    image = resize_image(imageoringin,[640,640],1)#640, 640
+    image = resize_image(imageoringin,size,1)
     
     # 获取输入输出的名称
     input_name = ort_session.get_inputs()[0].name
     output_name = ort_session.get_outputs()[0].name
     
-    # 加载图像并预处理
-    # 假设你的模型接受的是224x224大小的RGB图像，并且需要归一化到[0,1]范围
-    # image_path = "two_runners1.jpg"
-    
     input_data = np.array(image, dtype=np.float32) / 255.0
     input_data = input_data.transpose(2, 0, 1)  # 如果模型需要NCHW格式
     input_data = np.expand_dims(input_data, axis=0)  # 增加batch维度
-    
     # 进行推理
     result = ort_session.run([output_name], {input_name: input_data})
     return result
@@ -146,10 +147,10 @@ def get_inter(box1, box2):
         return 0
     if y1 >= y4 or y2 <= y3:
         return 0
-    # 将x1,x2,x3,x4排序，因为已经验证了两个框相交，所以x3-x2就是交集的宽
+    # 将x1,x2,x3,x4排序,因为已经验证了两个框相交,所以x3-x2就是交集的宽
     x_list = sorted([x1, x2, x3, x4])
     x_inter = x_list[2] - x_list[1]
-    # 将y1,y2,y3,y4排序，因为已经验证了两个框相交，所以y3-y2就是交集的宽
+    # 将y1,y2,y3,y4排序,因为已经验证了两个框相交,所以y3-y2就是交集的宽
     y_list = sorted([y1, y2, y3, y4])
     y_inter = y_list[2] - y_list[1]
     # 计算交集的面积
@@ -199,7 +200,7 @@ def draw(res, image, cls):
     Args:
         res: 预测框数据
         image: 原图
-        cls: 类别列表，类似["apple", "banana", "people"]  可以自己设计或者通过数据集的yaml文件获取
+        cls: 类别列表,类似["apple", "banana", "people"]  可以自己设计或者通过数据集的yaml文件获取
     Returns:
     """
     for r in res:
@@ -211,7 +212,7 @@ def draw(res, image, cls):
             text = "{}:{}".format(cls[int(r[5])], \
                                 round(float(r[4]), 2))
             h, w = int(r[3]) - int(r[1]), int(r[2]) - int(r[0])  # 计算预测框的长宽
-            font_size = min(h/640, w/640) * 3  # 计算字体大小（随框大小调整）
+            font_size = min(h/640, w/640) * 3  # 计算字体大小(随框大小调整)
             image = cv2.putText(image, text, (max(10, int(r[0])), max(20, int(r[1]))), cv2.FONT_HERSHEY_COMPLEX, max(font_size, 0.3), (0, 0, 255), 3)   # max()为了确保字体不过界
     # cv2.imshow("result", image)
     # cv2.waitKey()
@@ -223,7 +224,7 @@ def process_frame(imageoringin):
     conf_thres = 0.6
     iou_thres = 0
     image = resize_image(imageoringin, size, 1)
-    result = predict(image)
+    result = predict(image,size)
     result = std_output(result)
     result = nms(result, conf_thres, iou_thres)
     if result != []:
@@ -234,20 +235,20 @@ def process_frame(imageoringin):
     return image
 
 def CCD_open():
-    # 获取摄像头，传入0表示获取系统默认摄像头
+    # 获取摄像头,传入0表示获取系统默认摄像头
     cap = cv2.VideoCapture(1)
 
     # 打开cap
     cap.open(1)
 
-    # 无限循环，直到break被触发
+    # 无限循环,直到break被触发
     while cap.isOpened():
         
         # 获取画面
         success, imageoringin = cap.read()
         
-        if not success: # 如果获取画面不成功，则退出
-            print('获取画面不成功，退出')
+        if not success: # 如果获取画面不成功,则退出
+            print('获取画面不成功,退出')
             break
         
         ## 逐帧处理
@@ -256,10 +257,10 @@ def CCD_open():
         # 展示处理后的三通道图像
         cv2.imshow('my_window',imageoringin)
         
-        key_pressed = cv2.waitKey(60) # 每隔多少毫秒毫秒，获取键盘哪个键被按下
+        key_pressed = cv2.waitKey(60) # 每隔多少毫秒毫秒,获取键盘哪个键被按下
         # print('键盘上被按下的键：', key_pressed)
 
-        if key_pressed in [ord('q'),27]: # 按键盘上的q或esc退出（在英文输入法下）
+        if key_pressed in [ord('q'),27]: # 按键盘上的q或esc退出(在英文输入法下)
             break
         
     # 关闭摄像头
