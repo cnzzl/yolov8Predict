@@ -239,7 +239,7 @@ def CCD_open():
     cap = cv2.VideoCapture(1)
 
     # 打开cap
-    cap.open(1)
+    cap.open(0)
 
     # 无限循环,直到break被触发
     while cap.isOpened():
