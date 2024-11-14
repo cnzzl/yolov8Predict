@@ -252,10 +252,10 @@ def Camera_open():
             break
         
         ## 逐帧处理
-        frame = process_frame(imageoringin)
+        image = process_frame(imageoringin)
         
         # 展示处理后的三通道图像
-        cv2.imshow('my_window',imageoringin)
+        cv2.imshow('my_window',image)
         
         key_pressed = cv2.waitKey(60) # 每隔多少毫秒毫秒,获取键盘哪个键被按下
         # print('键盘上被按下的键：', key_pressed)
@@ -269,22 +269,20 @@ def Camera_open():
     cv2.destroyAllWindows()
 
     
-def Picture_predict(image_path):
-    image_path = "two_runners1.jpg"
+def save_predict(path):
+    # image_path = "two_runners1.jpg"
+    image_path = path
     imageoringin = cv2.imread(image_path)
-    frame = process_frame(imageoringin)
+    image = process_frame(imageoringin)
+    cv2.imwrite('output_image.jpg', image)
 
-def Vidio_Predict():
-    print("")
+
 def run(model):
     if model == "camera":
         Camera_open()
-    elif model == "picture":
-        Picture_predict()
-    elif model == "vedio":
-        Vidio_Predict()
     else:
-        print("请输入正确模式")
+        save_predict(model)
+        
 
-run("camera")
+run("two_runners1.jpg")
 
