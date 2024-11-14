@@ -234,7 +234,7 @@ def process_frame(imageoringin):
         image = imageoringin
     return image
 
-def CCD_open():
+def Camera_open():
     # 获取摄像头,传入0表示获取系统默认摄像头
     cap = cv2.VideoCapture(1)
 
@@ -267,5 +267,24 @@ def CCD_open():
     cap.release()
     # 关闭图像窗口
     cv2.destroyAllWindows()
-CCD_open()
+
+    
+def Picture_predict(image_path):
+    image_path = "two_runners1.jpg"
+    imageoringin = cv2.imread(image_path)
+    frame = process_frame(imageoringin)
+
+def Vidio_Predict():
+    print("")
+def run(model):
+    if model == "camera":
+        Camera_open()
+    elif model == "picture":
+        Picture_predict()
+    elif model == "vedio":
+        Vidio_Predict()
+    else:
+        print("请输入正确模式")
+
+run("camera")
 
