@@ -8,9 +8,9 @@ import torch
 import torch.onnx
 import torch.nn as nn
 from PIL import Image
-import image_manager
+import manager
 
-image_manager = image_manager.Image_manager(imageorin)
+manager = manager.Image_manager(imageorin)
 
 
 
